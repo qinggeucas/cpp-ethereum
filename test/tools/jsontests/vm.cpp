@@ -38,19 +38,28 @@ FakeExtVM::FakeExtVM(EnvInfo const& _envInfo, unsigned _depth):			/// TODO: XXX:
 	ExtVMFace(_envInfo, Address(), Address(), Address(), 0, 1, bytesConstRef(), bytes(), EmptySHA3, _depth)
 {}
 
-h160 FakeExtVM::create(u256 _endowment, u256& io_gas, bytesConstRef _init, Instruction _creationType, OnOpFunc const&)
+h160 FakeExtVM::create(u256 _endowment, u256& io_gas, bytesConstRef _init, CreationContext _creationType, OnOpFunc const&)
 {
 	unique_ptr<SealEngineFace> se(ChainParams(genesisInfo(eth::Network::MainNetworkTest)).createSealEngine());
+	/*
+	 * EIP86:
+	 *  creation from:
+	 *   - creation transaction: create using nonce before metropolis fork, create using code after
+	 *   - CREATE: always create using nonce
+	 *   - CREATE_P2SH: declared after metropolis fork, create using code
+	 */
 	Address na;
-	if (envInfo().number() >= se->chainParams().u256Param("metropolisForkBlock"))
-	{
-		Address pushedAddress = MaxAddress;
-		if (_creationType == Instruction::CREATE_P2SH)
-			pushedAddress = myAddress;
-		na = right160(sha3(pushedAddress.asBytes() + sha3(_init).asBytes()));
-	}
-	else
+	if (_creationType == CreationContext::CREATE)
 		na = right160(sha3(rlpList(myAddress, get<1>(addresses[myAddress]))));
+	else if (_creationType == CreationContext::CREATE_P2SH)
+		na = right160(sha3(myAddress.asBytes() + sha3(_init).asBytes()));
+	else // Transaction
+	{
+		if (envInfo().number() >= se->chainParams().u256Param("metropolisForkBlock"))
+			na = right160(sha3(MaxAddress.asBytes() + sha3(_init).asBytes()));
+		else
+			na = right160(sha3(rlpList(myAddress, get<1>(addresses[myAddress]))));
+	}
 
 	Transaction t(_endowment, gasPrice, io_gas, _init.toBytes());
 	callcreates.push_back(t);

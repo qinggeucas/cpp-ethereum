@@ -127,7 +127,8 @@ void VM::caseCreate()
 		if (!m_schedule->staticCallDepthLimit())
 			createGas -= createGas / 64;
 		u256 gas = createGas;
-		m_SPP[0] = (u160)m_ext->create(endowment, gas, bytesConstRef(m_mem.data() + initOff, initSize), m_OP, m_onOp);
+		CreationContext creationContext = m_OP == Instruction::CREATE ? CreationContext::CREATE : CreationContext::CREATE_P2SH;
+		m_SPP[0] = (u160)m_ext->create(endowment, gas, bytesConstRef(m_mem.data() + initOff, initSize), creationContext, m_onOp);
 
 		*m_io_gas_p -= (createGas - gas);
 		m_io_gas = uint64_t(*m_io_gas_p);

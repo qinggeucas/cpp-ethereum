@@ -259,6 +259,8 @@ private:
 	u256 m_gasUsed;
 };
 
+enum CreationContext: short;
+
 /**
  * @brief Interface and null implementation of the class for specifying VM externalities.
  */
@@ -298,7 +300,7 @@ public:
 	virtual void suicide(Address) { sub.suicides.insert(myAddress); }
 
 	/// Create a new (contract) account.
-	virtual h160 create(u256, u256&, bytesConstRef, Instruction, OnOpFunc const&) { return h160(); }
+	virtual h160 create(u256, u256&, bytesConstRef, CreationContext, OnOpFunc const&) { return h160(); }
 
 	/// Make a new message call.
 	/// @returns success flag and output data, if any.
