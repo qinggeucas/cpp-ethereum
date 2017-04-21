@@ -251,7 +251,7 @@ bool Executive::execute()
 	m_s.subBalance(m_t.sender(), m_gasCost);
 
 	if (m_t.isCreation())
-		return create(m_t.sender(), m_t.value(), m_t.gasPrice(), m_t.gas() - (u256)m_baseGasRequired, &m_t.data(), m_t.sender(), CreationContext::Tx);
+		return create(m_t.sender(), m_t.value(), m_t.gasPrice(), m_t.gas() - (u256)m_baseGasRequired, &m_t.data(), m_t.sender(), CreationContext::Transaction);
 	else
 		return call(m_t.receiveAddress(), m_t.sender(), m_t.value(), m_t.gasPrice(), bytesConstRef(&m_t.data()), m_t.gas() - (u256)m_baseGasRequired);
 }

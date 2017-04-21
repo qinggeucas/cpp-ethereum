@@ -78,8 +78,9 @@ private:
 	DebugOptions m_options;
 };
 
-enum CreationContext: short {
-	Tx,
+enum class CreationContext: short
+{
+	Transaction,
 	CREATE,
 	CREATE_P2SH
 };
